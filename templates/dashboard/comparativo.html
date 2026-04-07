@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Comparativo de Vendedores</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { font-family: sans-serif; background: #f4f6f9; padding: 20px; }
+        .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); max-width: 800px; margin: auto; }
+        h1 { text-align: center; color: #2c3e50; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <a href="{% url 'inicio' %}" style="text-decoration:none; color:#3498db;">← Volver</a>
+        <h1>Productividad por Vendedor</h1>
+        <p style="text-align:center;">Número de tickets generados por cada colaborador</p>
+        <canvas id="graficaComparativo"></canvas>
+    </div>
+
+    <script>
+        const datosComp = JSON.parse('{{ comparativo_json|escapejs }}');
+
+        new Chart(document.getElementById('graficaComparativo'), {
+            type: 'bar',
+            data: {
+                labels: datosComp.map(item => item.nombre),
+                datasets: [{
+                    label: 'Cantidad de Ventas',
+                    data: datosComp.map(item => item.num_ventas),
+                    backgroundColor: '#1abc9c'
+                }]
+            },
+            options: { indexAxis: 'y' } // Barras horizontales
+        });
+    </script>
+</body>
+</html>

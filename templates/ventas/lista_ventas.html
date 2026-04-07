@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Ventas</title>
+</head>
+<body>
+    <h1>Listado de ventas</h1>
+    <table border="1">
+        <tr>
+            <th>Folio</th>
+            <th>Fecha</th>
+            <th>Cliente</th>
+            <th>Sucursal</th>
+            <th>Vendedor</th>
+            <th>Método de pago</th>
+            <th>Total</th>
+        </tr>
+        {% for venta in ventas %}
+        <tr>
+            <td>{{ venta.folio }}</td>
+            <td>{{ venta.fecha }}</td>
+            <td>{{ venta.cliente.nombre }}</td>
+            <td>{{ venta.sucursal.nombre }}</td>
+            <td>{{ venta.vendedor.nombre }}</td>
+            <td>{{ venta.metodo_pago.nombre }}</td>
+            <td>{{ venta.total }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>

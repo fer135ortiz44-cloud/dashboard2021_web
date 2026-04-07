@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Reporte Mensual</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { font-family: sans-serif; background: #f4f6f9; padding: 20px; }
+        .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); max-width: 800px; margin: auto; }
+        h1 { text-align: center; color: #2c3e50; }
+        .btn { display: inline-block; margin-bottom: 20px; text-decoration: none; color: #3498db; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <a href="{% url 'inicio' %}" class="btn">← Volver al Dashboard</a>
+        <h1>Tendencia de Ventas Mensuales</h1>
+        <canvas id="graficaMensual"></canvas>
+    </div>
+
+    <script>
+        // Recibimos los datos
+        const datosMes = JSON.parse('{{ ventas_mes_json|escapejs }}');
+        const nombresMeses = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
+
+        new Chart(document.getElementById('graficaMensual'), {
+            type: 'line',
+            data: {
+                // Cambiamos item.fecha__month por item.mes
+                labels: datosMes.map(item => nombresMeses[item.mes - 1]),
+                datasets: [{
+                    label: 'Total Ventas por Mes ($)',
+                    data: datosMes.map(item => item.total),
+                    borderColor: '#3498db',
+                    backgroundColor: 'rgba(52, 152, 219, 0.1)',
+                    fill: true, // "true" en minúsculas para JavaScript
+                    tension: 0.3
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
