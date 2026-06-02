@@ -33,12 +33,12 @@
         background-color: #334155;
     }
 
-    /* Contenedor y Tabla Oscura */
+    /* Contenedor y Tabla */
     .table-container {
         background-color: #1e293b;
         border-radius: 12px;
-        padding: 15px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        padding: 10px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         border: 1px solid #334155;
         overflow-x: auto;
     }
@@ -49,30 +49,41 @@
     }
     th {
         color: #94a3b8;
-        font-size: 12px;
+        font-size: 13px;
         text-transform: uppercase;
-        padding: 16px 12px;
+        padding: 16px;
         border-bottom: 2px solid #334155;
         letter-spacing: 0.5px;
     }
     td {
         color: #e2e8f0;
         font-size: 14px;
-        padding: 14px 12px;
+        padding: 16px;
         border-bottom: 1px solid #334155;
+        vertical-align: middle;
     }
-    tr:hover td {
-        background-color: rgba(51, 65, 85, 0.3);
-    }
-    
-    /* Código del producto estilo tech */
-    .codigo-badge {
-        font-family: 'Courier New', Courier, monospace;
-        color: #94a3b8;
-        font-weight: bold;
+    tr:last-child td {
+        border-bottom: none;
     }
 
-    /* Banderas de Estatus */
+    /* Componentes del Vendedor */
+    .vendedor-info {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    .avatar-circle {
+        width: 36px;
+        height: 36px;
+        background-color: #0ea5e9;
+        color: #ffffff;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-weight: bold;
+        font-size: 14px;
+    }
     .badge-activo {
         background-color: rgba(34, 197, 94, 0.1);
         color: #22c55e;
@@ -82,21 +93,12 @@
         font-weight: bold;
         border: 1px solid rgba(34, 197, 94, 0.2);
     }
-    .badge-inactivo {
-        background-color: rgba(239, 68, 68, 0.1);
-        color: #ef4444;
-        padding: 4px 12px;
-        border-radius: 20px;
-        font-size: 12px;
-        font-weight: bold;
-        border: 1px solid rgba(239, 68, 68, 0.2);
-    }
 </style>
 
 <div class="page-header">
     <div class="header-text">
-        <h2>Lista de productos</h2>
-        <p>Consulta de productos con categoría, precio y estatus.</p>
+        <h2>Listado de Vendedores</h2>
+        <p>Control de ejecutivos de venta por sucursal.</p>
     </div>
     <a href="/" class="btn-volver">Volver al inicio</a>
 </div>
@@ -105,34 +107,36 @@
     <table>
         <thead>
             <tr>
-                <th>Código</th>
-                <th>Producto</th>
-                <th>Categoría</th>
-                <th>Precio</th>
-                <th>Stock</th>
+                <th>Vendedor</th>
+                <th>Correo Electrónico</th>
+                <th>Teléfono</th>
+                <th>Sucursal Asignada</th>
                 <th>Estatus</th>
             </tr>
         </thead>
         <tbody>
-            {% for producto in productos %}
+            {% for vendedor in vendedores %}
             <tr>
-                <td><span class="codigo-badge">{{ producto.codigo }}</span></td>
-                <td><strong>{{ producto.nombre }}</strong></td>
-                <td>{{ producto.categoria.nombre }}</td>
-                <td style="color: #cbd5e1;">${{ producto.precio }}</td>
-                <td style="color: #cbd5e1; font-weight: 500;">{{ producto.stock }}</td>
                 <td>
-                    {% if producto.activo %}
-                        <span class="badge-activo">Activo</span>
-                    {% else %}
-                        <span class="badge-inactivo">Inactivo</span>
-                    {% endif %}
+                    <div class="vendedor-info">
+                        <!-- Lógica condicional para mostrar la foto real o la inicial (Punto 9) -->
+                        {% if vendedor.foto %}
+                            <img src="{{ vendedor.foto.url }}" alt="{{ vendedor.nombre }}" style="width: 50px; height: 60px; border-radius: 60%; object-fit: cover; border: 2px solid #0ea5e9;">
+                        {% else %}
+                            <div class="avatar-circle">{{ vendedor.nombre|slice:":1"|upper }}</div>
+                        {% endif %}
+                        <span><strong>{{ vendedor.nombre }}</strong></span>
+                    </div>
                 </td>
+                <td>{{ vendedor.correo|default:"Sin correo registrado" }}</td>
+                <td>{{ vendedor.telefono|default:"Sin teléfono" }}</td>
+                <td>{{ vendedor.sucursal.nombre|default:"No asignada" }}</td>
+                <td><span class="badge-activo">Activo</span></td>
             </tr>
             {% empty %}
             <tr>
-                <td colspan="6" style="text-align: center; padding: 40px; color: #94a3b8;">
-                    No hay productos comerciales registrados en el catálogo.
+                <td colspan="5" style="text-align: center; padding: 30px; color: #94a3b8;">
+                    No hay vendedores registrados en el sistema.
                 </td>
             </tr>
             {% endfor %}

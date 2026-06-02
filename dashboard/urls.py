@@ -1,11 +1,21 @@
 from django.urls import path
-# 1. Agregamos 'descargar_reporte_excel' a la importación
-from .views import inicio, reportes_mensuales, comparativo_vendedores, descargar_reporte_excel
+from .views import (
+    inicio, 
+    reportes_mensuales, 
+    dashboard_comparativo, 
+    descargar_reporte_excel,
+    vista_analitica_avanzada,
+    vista_mercado_tiempo_real,
+    vista_agente_guia  # <-- Registramos la nueva vista del bot
+)
 
 urlpatterns = [
     path('', inicio, name='inicio'),
-    path('reportes-mensuales/', reportes_mensuales, name='reportes_mensuales'),
-    path('comparativo/', comparativo_vendedores, name='comparativo_vendedores'),
-    # 2. Agregamos la ruta física para el botón de Excel
-    path('descargar-excel/', descargar_reporte_excel, name='descargar_excel'),
+    path('reportes/mensual/', reportes_mensuales, name='reporte_mensual'),
+    path('comparativo/', dashboard_comparativo, name='dashboard_comparativo'),
+    path('exportar/excel/', descargar_reporte_excel, name='exportar_ventas_excel'),
+    path('analitica/', vista_analitica_avanzada, name='analitica_avanzada'),
+    path('mercado/', vista_mercado_tiempo_real, name='mercado_tiempo_real'),
+    # --- RUTA OFICIAL PARA EL PUNTO 13 ---
+    path('agente-guia/', vista_agente_guia, name='agente_guia'),
 ]

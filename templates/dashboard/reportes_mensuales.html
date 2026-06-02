@@ -1,49 +1,125 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>Reporte Mensual</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        body { font-family: sans-serif; background: #f4f6f9; padding: 20px; }
-        .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); max-width: 800px; margin: auto; }
-        h1 { text-align: center; color: #2c3e50; }
-        .btn { display: inline-block; margin-bottom: 20px; text-decoration: none; color: #3498db; font-weight: bold; }
-    </style>
-</head>
-<body>
-    <div class="card">
-        <a href="{% url 'inicio' %}" class="btn">← Volver al Dashboard</a>
-        <h1>Tendencia de Ventas Mensuales</h1>
-        <canvas id="graficaMensual"></canvas>
-    </div>
+{% extends 'base.html' %}
 
-    <script>
-        // Recibimos los datos
-        const datosMes = JSON.parse('{{ ventas_mes_json|escapejs }}');
-        const nombresMeses = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
+{% block content %}
+<style>
+    /* Cabecera del Reporte */
+    .page-header {
+        background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+        border: 1px solid #334155;
+        border-radius: 12px;
+        padding: 24px;
+        margin-bottom: 25px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+    .page-header h2 {
+        color: #ffffff;
+        font-size: 26px;
+        margin: 0 0 6px 0;
+    }
+    .page-header p {
+        color: #94a3b8;
+        margin: 0;
+        font-size: 14px;
+    }
 
-        new Chart(document.getElementById('graficaMensual'), {
-            type: 'line',
-            data: {
-                // Cambiamos item.fecha__month por item.mes
-                labels: datosMes.map(item => nombresMeses[item.mes - 1]),
-                datasets: [{
-                    label: 'Total Ventas por Mes ($)',
-                    data: datosMes.map(item => item.total),
-                    borderColor: '#3498db',
-                    backgroundColor: 'rgba(52, 152, 219, 0.1)',
-                    fill: true, // "true" en minúsculas para JavaScript
-                    tension: 0.3
-                }]
-            },
-            options: {
-                responsive: true,
-                scales: {
-                    y: { beginAtZero: true }
-                }
-            }
-        });
-    </script>
-</body>
-</html>
+    /* Botonera de Acciones Rápidas */
+    .action-bar {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 25px;
+    }
+    .btn-action {
+        background-color: #1e293b;
+        color: #e2e8f0;
+        padding: 10px 20px;
+        text-decoration: none;
+        border-radius: 8px;
+        border: 1px solid #334155;
+        font-size: 14px;
+        font-weight: 500;
+        transition: 0.3s;
+    }
+    .btn-action:hover {
+        background-color: #334155;
+    }
+    .btn-primary-action {
+        background-color: #3b82f6;
+        color: #ffffff;
+        border: 1px solid #2563eb;
+    }
+    .btn-primary-action:hover {
+        background-color: #2563eb;
+    }
+
+    /* Contenedor y Tabla Corporativa */
+    .table-container {
+        background-color: #1e293b;
+        border-radius: 12px;
+        padding: 15px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        border: 1px solid #334155;
+        overflow-x: auto;
+    }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        text-align: left;
+    }
+    th {
+        color: #94a3b8;
+        font-size: 12px;
+        text-transform: uppercase;
+        padding: 16px 15px;
+        border-bottom: 2px solid #334155;
+        letter-spacing: 0.5px;
+    }
+    td {
+        color: #e2e8f0;
+        font-size: 14px;
+        padding: 14px 15px;
+        border-bottom: 1px solid #334155;
+    }
+    tr:hover td {
+        background-color: rgba(51, 65, 85, 0.3);
+    }
+</style>
+
+<div class="page-header">
+    <h2>Reporte mensual de ventas</h2>
+    <p>Resumen consolidado por año y mes de los documentos registrados en la plataforma comercial.</p>
+</div>
+
+<div class="action-bar">
+    <a href="{% url 'inicio' %}" class="btn-action btn-primary-action">Volver al Dashboard</a>
+    <a href="{% url 'dashboard_comparativo' %}" class="btn-action">Ir al Comparativo</a>
+</div>
+
+<div class="table-container">
+    <table>
+        <thead>
+            <tr>
+                <th>Año</th>
+                <th>Mes</th>
+                <th>Total Documentos</th>
+                <th style="text-align: right;">Total Ventas</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in datos %}
+            <tr>
+                <td><strong>{{ item.anio }}</strong></td>
+                <td><span style="color: #38bdf8; font-weight: 500;">{{ item.mes }}</span></td>
+                <td>{{ item.total_documentos }} transacciones</td>
+                <td style="text-align: right; color: #34d399; font-weight: bold;">${{ item.total_ventas|floatformat:2 }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="4" style="text-align: center; padding: 40px; color: #94a3b8;">
+                    No se encontraron registros de ventas consolidados para el reporte mensual.
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

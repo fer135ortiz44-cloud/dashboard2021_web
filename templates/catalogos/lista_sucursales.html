@@ -1,0 +1,132 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+    /* Cabecera de la página */
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+    }
+    .header-text h2 {
+        color: #ffffff;
+        font-size: 28px;
+        margin: 0 0 8px 0;
+    }
+    .header-text p {
+        color: #94a3b8;
+        margin: 0;
+        font-size: 14px;
+    }
+    .btn-volver {
+        background-color: #1e293b;
+        color: #e2e8f0;
+        padding: 10px 20px;
+        text-decoration: none;
+        border-radius: 8px;
+        border: 1px solid #334155;
+        font-size: 14px;
+        transition: 0.3s;
+    }
+    .btn-volver:hover {
+        background-color: #334155;
+    }
+
+    /* Sistema de Cuadrícula (Grid) para las tarjetas */
+    .sucursales-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 25px;
+    }
+
+    /* Diseño de cada tarjeta */
+    .sucursal-card {
+        background-color: #1e293b;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        transition: transform 0.3s;
+        border: 1px solid #334155;
+    }
+    .sucursal-card:hover {
+        transform: translateY(-5px); /* Efecto de salto al pasar el mouse */
+        border-color: #0ea5e9;
+    }
+
+    /* Espacio para la futura imagen */
+    .sucursal-img {
+        height: 140px;
+        background: linear-gradient(135deg, #0f172a 0%, #334155 100%);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: #64748b;
+        font-size: 14px;
+        font-weight: bold;
+        border-bottom: 1px solid #334155;
+    }
+
+    /* Información de texto */
+    .sucursal-info {
+        padding: 20px;
+    }
+    .sucursal-info h3 {
+        margin: 0 0 10px 0;
+        color: #ffffff;
+        font-size: 18px;
+    }
+    .sucursal-info p {
+        color: #cbd5e1;
+        font-size: 13px;
+        margin: 5px 0;
+    }
+
+    /* Etiqueta de la ciudad */
+    .badge-ciudad {
+        display: inline-block;
+        background-color: rgba(14, 165, 233, 0.1);
+        color: #0ea5e9;
+        padding: 4px 12px;
+        border-radius: 15px;
+        font-size: 12px;
+        margin-top: 15px;
+        border: 1px solid #0ea5e9;
+        font-weight: bold;
+    }
+</style>
+
+<div class="page-header">
+    <div class="header-text">
+        <h2>Sucursales</h2>
+        <p>Red de puntos de venta y distribución.</p>
+    </div>
+    <a href="/" class="btn-volver">Volver al inicio</a>
+</div>
+
+<div class="sucursales-grid">
+    {% for sucursal in sucursales %}
+    <div class="sucursal-card">
+        {% if sucursal.foto %}
+            <div class="sucursal-img" style="background: url('{{ sucursal.foto.url }}') center/cover no-repeat; height: 140px;"></div>
+        {% else %}
+            <div class="sucursal-img">
+                Foto de sucursal
+            </div>
+        {% endif %}
+        
+        <div class="sucursal-info">
+            <h3>{{ sucursal.nombre }}</h3>
+            <p><strong>Dirección:</strong> {{ sucursal.direccion|default:"Pendiente de registro" }}</p>
+            <p><strong>Teléfono:</strong> {{ sucursal.telefono|default:"Sin asignar" }}</p>
+            
+            <div class="badge-ciudad">{{ sucursal.ciudad|default:"Activa" }}</div>
+        </div>
+    </div>
+    {% empty %}
+    <div style="grid-column: 1 / -1; text-align: center; color: #94a3b8; padding: 40px; background-color: #1e293b; border-radius: 12px;">
+        No hay sucursales registradas en el sistema.
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

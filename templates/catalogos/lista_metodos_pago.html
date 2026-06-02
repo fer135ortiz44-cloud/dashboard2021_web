@@ -2,7 +2,7 @@
 
 {% block content %}
 <style>
-    /* Cabecera */
+    /* Cabecera de la página */
     .page-header {
         display: flex;
         justify-content: space-between;
@@ -33,7 +33,7 @@
         background-color: #334155;
     }
 
-    /* Contenedor de Tabla */
+    /* Contenedor y Tabla */
     .table-container {
         background-color: #1e293b;
         border-radius: 12px;
@@ -58,60 +58,67 @@
     td {
         color: #e2e8f0;
         font-size: 14px;
-        padding: 14px 12px;
+        padding: 16px 12px;
         border-bottom: 1px solid #334155;
     }
     tr:hover td {
         background-color: rgba(51, 65, 85, 0.3);
     }
-    
-    /* Folio estresado tipo código */
-    .folio-badge {
-        font-family: 'Courier New', Courier, monospace;
-        color: #38bdf8;
+
+    /* Badge Estatus */
+    .badge-activo {
+        background-color: rgba(34, 197, 94, 0.1);
+        color: #22c55e;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 12px;
         font-weight: bold;
-        background-color: rgba(56, 189, 248, 0.1);
-        padding: 4px 8px;
-        border-radius: 4px;
+        border: 1px solid rgba(34, 197, 94, 0.2);
+    }
+    .badge-inactivo {
+        background-color: rgba(239, 68, 68, 0.1);
+        color: #ef4444;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: bold;
+        border: 1px solid rgba(239, 68, 68, 0.2);
     }
 </style>
 
 <div class="page-header">
     <div class="header-text">
-        <h2>Listado de Transacciones Globales</h2>
-        <p>Consulta general de documentos comerciales registrados en el sistema corporativo.</p>
+        <h2>Lista de métodos de pago</h2>
+        <p>Medios de cobro disponibles en el sistema.</p>
     </div>
-    <a href="/" class="btn-volver">Volver al dashboard</a>
+    <a href="/" class="btn-volver">Volver al inicio</a>
 </div>
 
 <div class="table-container">
     <table>
         <thead>
             <tr>
-                <th>Folio</th>
-                <th>Fecha de Registro</th>
-                <th>Cliente</th>
-                <th>Sucursal</th>
-                <th>Vendedor Responsable</th>
-                <th>Método de Pago</th>
-                <th style="text-align: right;">Monto Total</th>
+                <th>Método de pago</th>
+                <th>Estatus</th>
             </tr>
         </thead>
         <tbody>
-            {% for venta in ventas %}
+            {% for metodo in metodos %}
             <tr>
-                <td><span class="folio-badge">{{ venta.folio }}</span></td>
-                <td>{{ venta.fecha|date:"Y-m-d" }}</td>
-                <td><strong>{{ venta.cliente.nombre }}</strong></td>
-                <td>{{ venta.sucursal.nombre }}</td>
-                <td>{{ venta.vendedor.nombre }}</td>
-                <td>{{ venta.metodo_pago.nombre }}</td>
-                <td style="text-align: right; color: #34d399; font-weight: bold;">${{ venta.total }}</td>
+                <td><strong>{{ metodo.nombre }}</strong></td>
+                <td>
+                    <!-- Validación del campo activo que inyectamos al modelo -->
+                    {% if metodo.activo %}
+                        <span class="badge-activo">Activo</span>
+                    {% else %}
+                        <span class="badge-inactivo">Inactivo</span>
+                    {% endif %}
+                </td>
             </tr>
             {% empty %}
             <tr>
-                <td colspan="7" style="text-align: center; padding: 40px; color: #94a3b8;">
-                    No se encontraron registros de ventas en la base de datos corporativa.
+                <td colspan="2" style="text-align: center; padding: 40px; color: #94a3b8;">
+                    No hay métodos de pago registrados en el sistema corporativo.
                 </td>
             </tr>
             {% endfor %}

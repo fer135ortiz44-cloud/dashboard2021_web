@@ -1,13 +1,133 @@
-<!DOCTYPE html>
-<html lang="es">
-<head><meta charset="UTF-8"><title>Clientes</title></head>
-<body>
-    <h1>Listado de clientes</h1>
-    <table border="1">
-        <tr><th>ID</th><th>Nombre</th></tr>
-        {% for cliente in clientes %}
-        <tr><td>{{ cliente.id }}</td><td>{{ cliente.nombre }}</td></tr>
-        {% endfor %}
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+    /* Cabecera */
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+    }
+    .header-text h2 {
+        color: #ffffff;
+        font-size: 28px;
+        margin: 0 0 8px 0;
+    }
+    .header-text p {
+        color: #94a3b8;
+        margin: 0;
+        font-size: 14px;
+    }
+    .btn-volver {
+        background-color: #1e293b;
+        color: #e2e8f0;
+        padding: 10px 20px;
+        text-decoration: none;
+        border-radius: 8px;
+        border: 1px solid #334155;
+        font-size: 14px;
+        transition: 0.3s;
+    }
+    .btn-volver:hover {
+        background-color: #334155;
+    }
+
+    /* Contenedor y Tabla */
+    .table-container {
+        background-color: #1e293b;
+        border-radius: 12px;
+        padding: 15px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        border: 1px solid #334155;
+        overflow-x: auto;
+    }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        text-align: left;
+    }
+    th {
+        color: #94a3b8;
+        font-size: 12px;
+        text-transform: uppercase;
+        padding: 16px 12px;
+        border-bottom: 2px solid #334155;
+        letter-spacing: 0.5px;
+    }
+    td {
+        color: #e2e8f0;
+        font-size: 14px;
+        padding: 14px 12px;
+        border-bottom: 1px solid #334155;
+    }
+    tr:hover td {
+        background-color: rgba(51, 65, 85, 0.3);
+    }
+
+    /* Badge Estatus */
+    .badge-activo {
+        background-color: rgba(34, 197, 94, 0.1);
+        color: #22c55e;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: bold;
+        border: 1px solid rgba(34, 197, 94, 0.2);
+    }
+    .badge-inactivo {
+        background-color: rgba(239, 68, 68, 0.1);
+        color: #ef4444;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: bold;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+</style>
+
+<div class="page-header">
+    <div class="header-text">
+        <h2>Lista de clientes</h2>
+        <p>Consulta del catálogo de clientes registrados.</p>
+    </div>
+    <a href="/" class="btn-volver">Volver al inicio</a>
+</div>
+
+<div class="table-container">
+    <table>
+        <thead>
+            <tr>
+                <th>Cliente</th>
+                <th>Correo</th>
+                <th>Teléfono</th>
+                <th>Ciudad</th>
+                <th>Estatus</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for cliente in clientes %}
+            <tr>
+                <td><strong>{{ cliente.nombre }}</strong></td>
+                <td>{{ cliente.correo|default:"Sin correo" }}</td>
+                <td>{{ cliente.telefono|default:"Sin teléfono" }}</td>
+                <td>{{ cliente.ciudad|default:"---" }}</td>
+                <td>
+                    {% if cliente.activo %}
+                        <span class="badge-activo">Activo</span>
+                    {% else %}
+                        <span class="badge-inactivo">Inactivo</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5" style="text-align: center; padding: 40px; color: #94a3b8;">
+                    No hay clientes registrados en el sistema corporativo.
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
     </table>
-</body>
-</html>
+</div>
+{% endblock %}

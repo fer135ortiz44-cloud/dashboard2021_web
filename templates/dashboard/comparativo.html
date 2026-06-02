@@ -1,38 +1,193 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>Comparativo de Vendedores</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        body { font-family: sans-serif; background: #f4f6f9; padding: 20px; }
-        .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); max-width: 800px; margin: auto; }
-        h1 { text-align: center; color: #2c3e50; }
-    </style>
-</head>
-<body>
-    <div class="card">
-        <a href="{% url 'inicio' %}" style="text-decoration:none; color:#3498db;">← Volver</a>
-        <h1>Productividad por Vendedor</h1>
-        <p style="text-align:center;">Número de tickets generados por cada colaborador</p>
-        <canvas id="graficaComparativo"></canvas>
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+    /* Cabecera del Dashboard */
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 25px;
+    }
+    .header-text h2 {
+        color: #ffffff;
+        font-size: 28px;
+        margin: 0 0 6px 0;
+    }
+    .header-text p {
+        color: #94a3b8;
+        margin: 0;
+        font-size: 14px;
+    }
+    .btn-volver {
+        background-color: #1e293b;
+        color: #e2e8f0;
+        padding: 10px 20px;
+        text-decoration: none;
+        border-radius: 8px;
+        border: 1px solid #334155;
+        font-size: 14px;
+        transition: 0.3s;
+    }
+    .btn-volver:hover {
+        background-color: #334155;
+    }
+
+    /* Filtro de Divisa */
+    .filter-card {
+        background-color: #1e293b;
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 25px;
+        border: 1px solid #334155;
+    }
+    .filter-card label {
+        color: #94a3b8;
+        font-size: 13px;
+        display: block;
+        margin-bottom: 8px;
+    }
+    .select-divisa {
+        background-color: #0f172a;
+        color: #e2e8f0;
+        border: 1px solid #334155;
+        padding: 10px 15px;
+        border-radius: 8px;
+        width: 100%;
+        max-width: 300px;
+        font-size: 14px;
+        outline: none;
+    }
+
+    /* Grid de Tablas Comparativas */
+    .comparativo-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 20px;
+    }
+    .table-card {
+        background-color: #1e293b;
+        border-radius: 12px;
+        padding: 20px;
+        border: 1px solid #334155;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+    .table-card h3 {
+        color: #ffffff;
+        font-size: 18px;
+        margin: 0 0 15px 0;
+        border-bottom: 1px solid #334155;
+        padding-bottom: 10px;
+    }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        text-align: left;
+    }
+    th {
+        color: #94a3b8;
+        font-size: 12px;
+        text-transform: uppercase;
+        padding: 12px 8px;
+        border-bottom: 2px solid #334155;
+    }
+    td {
+        color: #e2e8f0;
+        font-size: 14px;
+        padding: 12px 8px;
+        border-bottom: 1px solid #334155;
+    }
+    tr:last-child td {
+        border-bottom: none;
+    }
+</style>
+
+<div class="page-header">
+    <div class="header-text">
+        <h2>Dashboard comparativo</h2>
+        <p>Comparativo de ventas por categoría, ciudad y método de pago.</p>
+    </div>
+    <a href="/" class="btn-volver">Volver al dashboard</a>
+</div>
+
+<div class="filter-card">
+    <form method="get" id="form-divisa">
+        <label for="divisa">Moneda de visualización</label>
+        <select name="divisa" id="divisa" class="select-divisa" onchange="document.getElementById('form-divisa').submit();">
+            <option value="MXN" {% if divisa == 'MXN' %}selected{% endif %}>MXN - Peso Mexicano</option>
+            <option value="USD" {% if divisa == 'USD' %}selected{% endif %}>USD - Dólar Estadounidense</option>
+        </select>
+    </form>
+    <p style="margin: 10px 0 0 0; color: #94a3b8; font-size: 12px;">
+        Moneda activa: <strong style="color: #38bdf8;">{% if divisa == 'MXN' %}Pesos mexicanos{% else %}Dólares estadounidenses{% endif %}</strong>
+    </p>
+</div>
+
+<div class="comparativo-grid">
+    <div class="table-card">
+        <h3>Por categoría</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Categoría</th>
+                    <th style="text-align: right;">Total {{ prefijo_tabla }}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in comparativo_categorias %}
+                <tr>
+                    <td><strong>{{ item.producto_categoria_nombre|default:"Sin categoría" }}</strong></td>
+                    <td style="text-align: right; color: #cbd5e1;">{{ simbolo }}{{ item.total|floatformat:2 }}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="2" style="color:#94a3b8; padding: 10px 0;">No hay registros de categorías.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
 
-    <script>
-        const datosComp = JSON.parse('{{ comparativo_json|escapejs }}');
+    <div class="table-card">
+        <h3>Por ciudad</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Ciudad</th>
+                    <th style="text-align: right;">Total {{ prefijo_tabla }}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in comparativo_ciudades %}
+                <tr>
+                    <td><strong>{{ item.sucursal_ciudad|default:"Desconocida" }}</strong></td>
+                    <td style="text-align: right; color: #cbd5e1;">{{ simbolo }}{{ item.total|floatformat:2 }}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="2" style="color:#94a3b8; padding: 10px 0;">No hay registros de ciudades.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 
-        new Chart(document.getElementById('graficaComparativo'), {
-            type: 'bar',
-            data: {
-                labels: datosComp.map(item => item.nombre),
-                datasets: [{
-                    label: 'Cantidad de Ventas',
-                    data: datosComp.map(item => item.num_ventas),
-                    backgroundColor: '#1abc9c'
-                }]
-            },
-            options: { indexAxis: 'y' } // Barras horizontales
-        });
-    </script>
-</body>
-</html>
+    <div class="table-card">
+        <h3>Por método de pago</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Método de pago</th>
+                    <th style="text-align: right;">Total {{ prefijo_tabla }}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in comparativo_metodos %}
+                <tr>
+                    <td><strong>{{ item.metodo_pago_nombre }}</strong></td>
+                    <td style="text-align: right; color: #cbd5e1;">{{ simbolo }}{{ item.total|floatformat:2 }}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="2" style="color:#94a3b8; padding: 10px 0;">No hay registros de pagos.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

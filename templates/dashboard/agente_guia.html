@@ -1,0 +1,212 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+    /* Estilos del Panel Principal */
+    .page-header { margin-bottom: 25px; }
+    .page-header h2 { color: #ffffff; font-size: 28px; margin: 0 0 6px 0; }
+    .page-header p { color: #94a3b8; margin: 0; font-size: 14px; }
+
+    .chat-grid {
+        display: grid;
+        grid-template-columns: 1fr 350px;
+        gap: 25px;
+        margin-bottom: 30px;
+    }
+    .chat-card {
+        background-color: #1e293b;
+        border-radius: 12px;
+        padding: 24px;
+        border: 1px solid #334155;
+    }
+    .chat-card h3 { color: #ffffff; font-size: 18px; margin: 0 0 15px 0; }
+    
+    /* Historial de conversación */
+    .chat-box {
+        background-color: #0f172a;
+        border: 1px solid #334155;
+        border-radius: 8px;
+        padding: 20px;
+        height: 250px;
+        overflow-y: auto;
+        margin-bottom: 20px;
+    }
+    .msg { margin-bottom: 15px; padding: 12px 16px; border-radius: 8px; max-width: 80%; font-size: 14px; line-height: 1.5; }
+    .msg-user { background-color: #0ea5e9; color: #ffffff; margin-left: auto; }
+    .msg-bot { background-color: #1e293b; color: #e2e8f0; border: 1px solid #334155; }
+
+    /* Inputs y Formulario */
+    .form-inline { display: flex; gap: 10px; }
+    .input-chat {
+        background-color: #0f172a;
+        color: #e2e8f0;
+        border: 1px solid #334155;
+        padding: 12px;
+        border-radius: 8px;
+        flex-grow: 1;
+        font-size: 14px;
+        outline: none;
+    }
+    .btn-chat { background-color: #0ea5e9; color: white; border: none; padding: 0 24px; border-radius: 8px; cursor: pointer; font-weight: 600; }
+    .btn-chat:hover { background-color: #0284c7; }
+
+    /* Botones de Ejemplos Sugeridos */
+    .sugerencias { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 15px; }
+    .btn-sug {
+        background-color: rgba(56, 189, 248, 0.1);
+        color: #38bdf8;
+        border: 1px solid rgba(56, 189, 248, 0.2);
+        padding: 8px 14px;
+        border-radius: 20px;
+        font-size: 13px;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+    .btn-sug:hover { background-color: rgba(56, 189, 248, 0.2); }
+
+    /* Capacidades del agente */
+    .list-capabilities { padding-left: 20px; color: #cbd5e1; font-size: 13.5px; }
+    .list-capabilities li { margin-bottom: 12px; }
+
+    /* --- WIDGET CHATBOT EMERGENTE (PUNTO 13.1) --- */
+    .floating-chat {
+        position: fixed;
+        bottom: 25px;
+        right: 25px;
+        z-index: 1000;
+        font-family: sans-serif;
+    }
+    .chat-launcher {
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(135deg, #0ea5e9 0%, #2563eb 100%);
+        border-radius: 50%;
+        box-shadow: 0 4px 16px rgba(14, 165, 233, 0.4);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: transform 0.3s;
+    }
+    .chat-launcher:hover { transform: scale(1.08); }
+    .chat-launcher svg { width: 28px; height: 28px; fill: white; }
+    
+    .chat-window {
+        display: none;
+        width: 350px;
+        height: 430px;
+        background-color: #1e293b;
+        border: 1px solid #334155;
+        border-radius: 12px;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+        position: absolute;
+        bottom: 75px;
+        right: 0;
+        flex-direction: column;
+        overflow: hidden;
+    }
+    .window-header {
+        background-color: #0f172a;
+        padding: 15px;
+        border-bottom: 1px solid #334155;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .window-header h4 { margin: 0; color: white; font-size: 14px; }
+    .close-btn { color: #94a3b8; cursor: pointer; font-size: 18px; font-weight: bold; }
+</style>
+
+<div class="page-header">
+    <h2>Agente guía del sistema</h2>
+    <p>Consulta en lenguaje natural, interpretación de KPIs, conclusiones ejecutivas y orientación inteligente dentro del SI.</p>
+</div>
+
+<div class="chat-grid">
+    <div class="chat-card">
+        <h3>Haz una pregunta </h3>
+        
+        <div class="chat-box">
+            {% if consulta %}
+                <div class="msg msg-user"><strong>Tú:</strong> {{ consulta }}</div>
+                <div class="msg msg-bot"><strong>Agente Guía:</strong> {{ respuesta }}</div>
+            {% else %}
+                <div class="msg msg-bot">Aún no hay preguntas. Escribe una consulta y el agente empezará a interpretar el sistema contigo.</div>
+            {% endif %}
+        </div>
+
+        <form method="post" action="{% url 'agente_guia' %}" id="main-chat-form" class="form-inline">
+            {% csrf_token %}
+            <input type="text" name="consulta" id="main-input" class="input-chat" placeholder="Ejemplo: ¿Qué vendedor tuvo mejor desempeño este mes? " required>
+            <button type="submit" class="btn-chat">Consultar </button>
+        </form>
+
+        <h4 style="color:#94a3b8; font-size:13px; margin: 20px 0 10px 0;">Ejemplos sugeridos </h4>
+        <div class="sugerencias">
+            <button class="btn-sug" onclick="sendSug('¿Qué vendedor tuvo mejor desempeño este mes? ')">¿Qué vendedor tuvo mejor desempeño este mes? </button>
+            <button class="btn-sug" onclick="sendSug('¿Qué categoría tuvo el ingreso más alto?')">¿Qué categoría tuvo el ingreso más alto?</button>
+            <button class="btn-sug" onclick="sendSug('Dame una conclusión ejecutiva del trimestre ')">Dame una conclusión ejecutiva del trimestre </button>
+            <button class="btn-sug" onclick="sendSug('¿Cuál es el ticket promedio?')">¿Cuál es el ticket promedio?</button>
+        </div>
+    </div>
+
+    <div class="chat-card" style="height: fit-content;">
+        <h3>Capacidades del agente </h3>
+        <ul class="list-capabilities">
+            <li><strong>Consultas de negocio:</strong> Mejor vendedor, cliente top, caída por categoría.</li>
+            <li><strong>Explicación de KPIs:</strong> Ticket promedio, conversión, score, ANOVA, regresión.</li>
+            <li><strong>Orientación interna:</strong> Ayuda para ubicar módulos como CRM, analítica, comparativo o reportes.</li>
+        </ul>
+    </div>
+</div>
+
+<div class="floating-chat">
+    <div class="chat-launcher" onclick="toggleChatWindow()">
+        <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"/></svg>
+    </div>
+    
+    <div class="chat-window" id="popup-chat-window">
+        <div class="window-header">
+            <h4>Asistente Ejecutivo Emergente </h4>
+            <span class="close-btn" onclick="toggleChatWindow()">&times;</span>
+        </div>
+        <div style="flex-grow:1; padding:15px; background-color:#0f172a; overflow-y:auto; font-size:13px;" id="popup-box">
+            <div style="background-color:#1e293b; padding:10px; border-radius:6px; margin-bottom:10px; border:1px solid #334155;">
+                ¡Hola! Soy tu asistente emergente. Escribe aquí o usa el panel principal para consultas profundas.
+            </div>
+            {% if consulta %}
+                <div style="color:#38bdf8; margin-bottom:8px; text-align:right;"><strong>Tú:</strong> {{ consulta }}</div>
+                <div style="color:#cbd5e1; background-color:#1e293b; padding:8px; border-radius:6px; border:1px solid #334155;">{{ respuesta }}</div>
+            {% endif %}
+        </div>
+        <div style="padding:10px; background-color:#1e293b; border-top:1px solid #334155;">
+            <form method="post" action="{% url 'agente_guia' %}" class="form-inline">
+                {% csrf_token %}
+                <input type="text" name="consulta" class="input-chat" style="padding:8px; font-size:13px;" placeholder="Escribe tu consulta corporativa..." required>
+                <button type="submit" class="btn-chat" style="padding:0 12px; font-size:13px;">Enviar</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Lógica para disparar los ejemplos sugeridos de forma instantánea
+    function sendSug(texto) {
+        document.getElementById('main-input').value = texto;
+        document.getElementById('main-chat-form').submit();
+    }
+
+    // Lógica para abrir/cerrar el Chatbot Emergente (Punto 13.1)
+    function toggleChatWindow() {
+        const win = document.getElementById('popup-chat-window');
+        if (win.style.display === 'flex') {
+            win.style.display = 'none';
+        } else {
+            win.style.display = 'flex';
+            // Auto scroll al final de la ventana emergente
+            const box = document.getElementById('popup-box');
+            box.scrollTop = box.scrollHeight;
+        }
+    }
+</script>
+{% endblock %}
